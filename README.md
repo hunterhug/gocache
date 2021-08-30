@@ -1,4 +1,4 @@
-# Memory Cache auto clean expire data implement by Golang
+# Memory Cache auto clean expired data implement by Golang
 
 [![GitHub forks](https://img.shields.io/github/forks/hunterhug/gocache.svg?style=social&label=Forks)](https://github.com/hunterhug/gocache/network)
 [![GitHub stars](https://img.shields.io/github/stars/hunterhug/gocache.svg?style=social&label=Stars)](https://github.com/hunterhug/gocache/stargazers)
