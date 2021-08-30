@@ -29,14 +29,15 @@ func (i *cacheItem) IsExpire() bool {
 
 func (c *cache) loopCleanExpireItem() {
 	timer := time.NewTimer(time.Second)
-
 	for {
 		if c.close {
+			timer.Stop()
 			return
 		}
 		select {
 		case <-timer.C:
 			c.cleanOlder()
+			timer.Reset(time.Second)
 		}
 	}
 }
