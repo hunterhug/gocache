@@ -4,14 +4,12 @@ import (
 	"sync"
 )
 
-// use queue implement iterator
 type linkQueue struct {
 	root *linkNode  // 链表起点
 	size int        // 队列的元素数量
 	lock sync.Mutex // 为了并发安全使用的锁
 }
 
-// link node
 type linkNode struct {
 	next  *linkNode
 	value bsTreeNode

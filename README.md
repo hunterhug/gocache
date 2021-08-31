@@ -33,7 +33,9 @@ type Cache interface {
     Get(key string) (value []byte, expireUnixNanosecondDateTime int64, exist bool)
     GetInterface(key string) (value interface{}, expireUnixNanosecondDateTime int64, exist bool)
     GetOldestKey() (key string, expireUnixNanosecondDateTime int64, exist bool)
-    Size() int64
+    Size() int
+    Index(index int) (value []byte, expireUnixNanosecondDateTime int64, exist bool)
+    IndexInterface(index int) (value interface{}, expireUnixNanosecondDateTime int64, exist bool)
     KeyList() []string
     ShutDown()
 }

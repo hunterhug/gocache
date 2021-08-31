@@ -48,3 +48,15 @@ func TestNew(t *testing.T) {
 		fmt.Println(key, "not exist")
 	}
 }
+
+func TestNew2(t *testing.T) {
+	c := New()
+	defer c.ShutDown()
+	for i := 0; i < 5; i++ {
+		c.Set(fmt.Sprintf("%s-%d", "xx", i), []byte(fmt.Sprintf("hi:%d", i)), 5*time.Second)
+	}
+
+	for i := 0; i < c.Size(); i++ {
+		fmt.Println(c.Index(i))
+	}
+}

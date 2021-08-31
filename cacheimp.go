@@ -119,7 +119,7 @@ func (c *cache) setByExpireDateTime(key string, value cacheItem, expireUnixNanos
 		innerValue := &algorithm.HeapValue{
 			Value: expireUnixNanosecondDateTime,
 			Key:   key,
-			Extra: value,
+			Extra: &value,
 		}
 		c.treeMap.Put(key, innerValue)
 		c.minHeap.Push(innerValue)
@@ -129,7 +129,7 @@ func (c *cache) setByExpireDateTime(key string, value cacheItem, expireUnixNanos
 	oldTreeMapValueReal := oldTreeMapValue.(*algorithm.HeapValue)
 	oldHeapValue := c.minHeap.PopIndex(oldTreeMapValueReal.Index)
 	oldHeapValue.Value = expireUnixNanosecondDateTime
-	oldHeapValue.Extra = value
+	oldHeapValue.Extra = &value
 	c.minHeap.Push(oldHeapValue)
 }
 
@@ -148,7 +148,7 @@ func (c *cache) set(key string, value cacheItem, expireTime time.Duration) {
 		innerValue := &algorithm.HeapValue{
 			Value: expireUnixNanosecondDateTime,
 			Key:   key,
-			Extra: value,
+			Extra: &value,
 		}
 		c.treeMap.Put(key, innerValue)
 		c.minHeap.Push(innerValue)
@@ -158,7 +158,7 @@ func (c *cache) set(key string, value cacheItem, expireTime time.Duration) {
 	oldTreeMapValueReal := oldTreeMapValue.(*algorithm.HeapValue)
 	oldHeapValue := c.minHeap.PopIndex(oldTreeMapValueReal.Index)
 	oldHeapValue.Value = expireUnixNanosecondDateTime
-	oldHeapValue.Extra = value
+	oldHeapValue.Extra = &value
 	c.minHeap.Push(oldHeapValue)
 }
 
@@ -192,14 +192,14 @@ func (c *cache) get(key string) (value *cacheItem, exist bool) {
 	}
 
 	treeMapValueReal := treeMapValue.(*algorithm.HeapValue)
-	item := treeMapValueReal.Extra.(cacheItem)
+	item := treeMapValueReal.Extra.(*cacheItem)
 	if item.IsExpire() {
 		c.minHeap.PopIndex(treeMapValueReal.Index)
 		c.treeMap.Delete(key)
 		return nil, false
 	}
 
-	return &item, true
+	return item, true
 }
 
 func (c *cache) Get(key string) (value []byte, expireUnixNanosecondDateTime int64, exist bool) {
@@ -220,14 +220,46 @@ func (c *cache) GetInterface(key string) (value interface{}, expireUnixNanosecon
 	return
 }
 
-func (c *cache) Size() int64 {
+func (c *cache) Size() int {
 	c.locker.Lock()
 	defer c.locker.Unlock()
 	if c.close {
 		return 0
 	}
 
-	return int64(c.minHeap.Size())
+	return c.minHeap.Size()
+}
+
+func (c *cache) IndexInterface(index int) (value interface{}, expireUnixNanosecondDateTime int64, exist bool) {
+	c.locker.Lock()
+	defer c.locker.Unlock()
+	if c.close {
+		return
+	}
+
+	h := c.minHeap.Get(index)
+	if h == nil {
+		return
+	}
+
+	item := h.Extra.(*cacheItem)
+	return item.Raw, item.expireUnixNanosecondDateTime, true
+}
+
+func (c *cache) Index(index int) (value []byte, expireUnixNanosecondDateTime int64, exist bool) {
+	c.locker.Lock()
+	defer c.locker.Unlock()
+	if c.close {
+		return
+	}
+
+	h := c.minHeap.Get(index)
+	if h == nil {
+		return
+	}
+
+	item := h.Extra.(*cacheItem)
+	return item.RawByte, item.expireUnixNanosecondDateTime, true
 }
 
 func (c *cache) GetOldestKey() (key string, expireUnixNanosecondDateTime int64, exist bool) {
